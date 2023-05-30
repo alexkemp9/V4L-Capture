@@ -1,0 +1,61 @@
+#
+# CONFIGURATION FOR V4L CAPTURE SCRIPT
+# See http://linuxtv.org/wiki/index.php/V4L_capturing
+#
+
+#
+# VARIABLES YOU NEED TO EDIT
+# See the wiki page for details about finding these values
+#
+
+# Set these based on your hardware/location:
+TV_NORM="PAL" # (search Wikipedia for the exact norm in your country)
+
+AUDIO_DEVICE="hw:2"
+
+VIDEO_DEVICE="/dev/video0"
+VIDEO_INPUT="1"
+VIDEO_CONTROLS="brightness=128,contrast=64,saturation=64,hue=0"
+
+# PAL video is approximately 720x576 resolution.  VHS tapes have about half the horizontal quality, but this post convinced me to encode at 720x576 anyway:
+# http://forum.videohelp.com/threads/215570-Sensible-resolution-for-VHS-captures?p=1244415#post1244415
+VIDEO_CAPABILITIES="video/x-raw, format=UYVY, framerate=25/1, width=720, height=576"
+AUDIO_CAPABILITIES="audio/x-raw, rate=48000, channels=2"
+
+# Encode settings:
+ENCODE_VIDEO_FORMAT="libx264"
+ENCODE_AUDIO_FORMAT="flac"
+ENCODE_MUXER_FORMAT="matroska"
+ENCODE_VIDEO_OPTIONS="-preset ultrafast -x264opts crf=18:keyint=50:min-keyint=5 -pix_fmt yuv420p" # change "18" to "0" for true lossless video
+ENCODE_AUDIO_OPTIONS=""
+ENCODE_MUXER_OPTIONS=""
+ENCODE_EXTENSION="mkv"
+
+# Transcode settings:
+TRANSCODE_VIDEO_FORMAT="libx264"
+TRANSCODE_AUDIO_FORMAT="libmp3lame"
+TRANSCODE_MUXER_FORMAT="matroska"
+TRANSCODE_VIDEO_OPTIONS="-flags +ilme+ildct -preset veryslow -crf 22 -pix_fmt yuv420p" # increase/decrease "22" for smaller files/better quality
+TRANSCODE_AUDIO_OPTIONS="-b:a 256k" # for some reason, ffmpeg desyncs audio and video if "-q:a" is used instead of "-b:a"
+TRANSCODE_MUXER_OPTIONS=""
+
+#
+# COMMON TRANSCODE SETTINGS
+#
+
+# For systems that do not automatically handle audio/video initialisation times:
+DEFAULT_AUDIO_DELAY="0"
+
+# Reducing noise:
+DEFAULT_NOISE_REDUCTION="0.21"
+
+# remove overscan:
+DEFAULT_VIDEO_FILTERS="crop=(iw-10):(ih-14):3:0, pad=iw+10:ih+14:(ow-iw)/2:(oh-ih)/2"
+
+# make all files are about as loud as each other (note: this filter uses sox instead of ffmpeg - see the man page for details):
+DEFAULT_AUDIO_FILTERS="norm -1"
+
+# Once you have set the above, record a silent source (e.g. a paused tape or silent TV channel)
+# then call /home/alexk/.v4l-capture.sh --profile to build a default noise profile
+DEFAULT_NOISE_PROFILE=""
+
